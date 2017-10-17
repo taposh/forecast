@@ -50,7 +50,7 @@ class utils:
                 #use the same prediction for next n periods
                 if n_periods >1 :
                     #Get the initial naive prediction i.e. move by 1
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     #Get the naive dates..
                     #get next date to pass to date range
                     forecast_date = naive_prediction.index[-1] + relativedelta(years=1)
@@ -68,7 +68,7 @@ class utils:
                     #print("result")
                     #print(result)
                 else :
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     result = naive_prediction
                 
                 if verbose == True: 
@@ -79,7 +79,7 @@ class utils:
                 #use the same prediction for next n periods
                 if n_periods >1 :
                     #Get the initial naive prediction i.e. move by 1
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     #Get the naive dates..
                     #get next date to pass to date range
                     forecast_date = naive_prediction.index[-1] + relativedelta(months=3)
@@ -97,7 +97,7 @@ class utils:
                     #print("result")
                     #print(result)
                 else :
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     result = naive_prediction
                 if verbose == True: 
                     print("The time series frequency is : quarterly")
@@ -106,7 +106,7 @@ class utils:
                 #use the same prediction for next n periods
                 if n_periods >1 :
                     #Get the initial naive prediction i.e. move by 1
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     #Get the naive dates..
                     #get next date to pass to date range
                     forecast_date = naive_prediction.index[-1] + relativedelta(months=1)
@@ -124,7 +124,7 @@ class utils:
                     #print("result")
                     #print(result)
                 else :
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     result = naive_prediction
                 if verbose == True: 
                     print("The time series frequency is : monthly")
@@ -133,7 +133,7 @@ class utils:
                 #use the same prediction for next n periods
                 if n_periods >1 :
                     #Get the initial naive prediction i.e. move by 1
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     #Get the naive dates..
                     #get next date to pass to date range
                     forecast_date = naive_prediction.index[-1] + relativedelta(weeks=1)
@@ -151,7 +151,7 @@ class utils:
                     #print("result")
                     #print(result)
                 else :
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     result = naive_prediction
                 if verbose == True: 
                     print("The time series frequency is : weekly")
@@ -160,7 +160,7 @@ class utils:
                 #use the same prediction for next n periods
                 if n_periods >1 :
                     #Get the initial naive prediction i.e. move by 1
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     #Get the naive dates..
                     #get next date to pass to date range
                     forecast_date = naive_prediction.index[-1] + relativedelta(days=1)
@@ -178,7 +178,7 @@ class utils:
                     #print("result")
                     #print(result)
                 else :
-                    naive_prediction = series1.shift(1, freq=tsFreq[0])
+                    naive_prediction = series.shift(1, freq=tsFreq[0])
                     result = naive_prediction
                 if verbose == True: 
                     print("The time series frequency is : daily")
