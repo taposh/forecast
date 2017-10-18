@@ -22,7 +22,7 @@ class utils:
         self.author = author
     #import and install packages
     
-    def import2(self, package):
+    def import2(package):
         try:
             __import__(package)
         except ImportError:
@@ -30,14 +30,11 @@ class utils:
                        
     
     ##TODO: Fix Typo .........
-    def naive_prediction_n_periods(self, series,n_periods,verbose=False):
+    def naive_prediction_n_periods(series,n_periods,verbose=False):
         """
         Returns a Series object with Naive Predictions
         Handles the frequency for yearly, monthly,daily and quarterly
         """
-       
-        result = pd.DataFrame()
-
          # Find the type of series object
         if (type(series).__name__ =="Series"):
             #Find frequency
@@ -187,7 +184,7 @@ class utils:
         
         
     
-    def find_next_forecastdate(self, series,verbose=False):
+    def find_next_forecastdate(series,verbose=False):
         """Find frequency and forecast dates for a given series
             Keyword arguments:
             series -- pandas series object
@@ -231,7 +228,7 @@ class utils:
         
         
         
-    def find_multiple_forecastdates(self, series,n_preds,verbose=False):         
+    def find_multiple_forecastdates(series,n_preds,verbose=False):         
         """Find Multiple forecast dates for a given series and preds
             Keyword arguments:
             series -- pandas series object
@@ -277,7 +274,7 @@ class utils:
             
         
     #function to add period to series
-    def addperiodstoSeries(self, series,num_value,verbose=False):
+    def addperiodstoSeries(series,num_value,verbose=False):
         """Adding one period to a series.
             Keyword arguments:
             series -- pandas series object
@@ -300,13 +297,13 @@ class utils:
             print("Delta Series added", newseries)
         
         #append the new series to old series
-        result_series = series1.append(newseries)
+        result_series = series.append(newseries)
         
         return result_series  
       
         
         
-    def addOneyeartoSeries(self, series,num_value,verbose=False):
+    def addOneyeartoSeries(series,num_value,verbose=False):
         """Adding one period to a series.
             Keyword arguments:
             series -- pandas series object
@@ -315,7 +312,7 @@ class utils:
         """
         series = series.dropna(how='all')
         #create a new series and then append to the series
-        #forecast_dates = list(series1.index)
+        #forecast_dates = list(series.index)
         last_date = series.index[-1]
         if verbose==True:
             print("Last Date", last_date)
@@ -328,11 +325,11 @@ class utils:
         if verbose== True:
             print("Delta Series", newseries)
         #append the new series to old series
-        result_series = series1.append(newseries)
+        result_series = series.append(newseries)
         return result_series  
     # pass in a series object and get the forecast for next period
     
-    def average_forecast_one_period(self, series,verbose=False):
+    def average_forecast_one_period(series,verbose=False):
         """Average forecasting for one period
             Keyword arguments:
             myseries -- pandas series object
@@ -354,7 +351,7 @@ class utils:
     
     
     # pass in a series object and get the forecast for next n periods
-    def average_forecast_n_periods_old(self, series,n_periods,start_date,verbose=False):
+    def average_forecast_n_periods_old(series,n_periods,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
             myseries -- pandas series object
@@ -391,7 +388,7 @@ class utils:
             print("No value returned")
             return None
         
-    def average_forecast_n_periods(self, series,n_periods,start_date,verbose=False):
+    def average_forecast_n_periods(series,n_periods,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
             myseries -- pandas series object
@@ -420,7 +417,7 @@ class utils:
     
         
     # pass in a series object and get the forecast for next n periods
-    def average_forecast_n_periods2(self, series,n,start_date,verbose=False):
+    def average_forecast_n_periods2(series,n,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
             myseries -- pandas series object
@@ -457,7 +454,7 @@ class utils:
             return None
             
     # moving average using k last points
-    def moving_average_forecast(self, series, window_size,verbose=False):
+    def moving_average_forecast(series, window_size,verbose=False):
         """Moving Average Forecast
             Keyword arguments:
             series -- pandas series object
@@ -475,7 +472,7 @@ class utils:
     # Moving average using k last points                   #
     ########################################################
     # TODO: Test cases for this
-    def moving_average_forecast_n_periods(self, series, window_size, n,start_date,verbose=False):
+    def moving_average_forecast_n_periods(series, window_size, n,start_date,verbose=False):
         """Moving Average Forecast
             Keyword arguments:
             series -- pandas series object
@@ -526,7 +523,7 @@ class utils:
             
             return result_series
     
-    def moving_average_forecast_n_periods_old(self, series,window_size,n_periods,start_date,verbose=True):
+    def moving_average_forecast_n_periods_old(series,window_size,n_periods,start_date,verbose=True):
         """Moving Average Forecast for number of periods
             Keyword arguments:
             series -- pandas series object
@@ -561,7 +558,7 @@ class utils:
         return inpseries
     
     # weighted average, weights is a list of weights
-    def weighted_average_forecast(self, series, weights,verbose=False):
+    def weighted_average_forecast(series, weights,verbose=False):
         """Weighted Average Forecast
             Keyword arguments:
             series -- pandas series object
@@ -580,7 +577,7 @@ class utils:
 
     # given a series and alpha, return series of smoothed points
     # https://pandas.pydata.org/pandas-docs/stable/timeseries.html
-    def exponential_smoothing_forecast(self, series, alpha,verbose=False):
+    def exponential_smoothing_forecast(series, alpha,verbose=False):
         """Exponential Smoothing Forecast
             Keyword arguments:
             series -- pandas series object
@@ -628,7 +625,7 @@ class utils:
         
     
     #Exponential Smoothing Forecast for multiple periods
-    def exponential_smoothing_forecast_n_periods(self, series, alpha,n_periods,verbose=False):
+    def exponential_smoothing_forecast_n_periods(series, alpha,n_periods,verbose=False):
         """Exponential Smoothing Forecast for multiple periods
             Keyword arguments:
             series -- pandas series object
@@ -660,7 +657,7 @@ class utils:
         
         
     # given a series,alpha and trend return series of smoothed points
-    def holts_addative(self, series, alpha,beta,verbose=False):
+    def holts_addative(series, alpha,beta,verbose=False):
         """Holts or Double Exponential Smoothing Forecast
             Keyword arguments:
             series -- pandas series object
@@ -713,7 +710,7 @@ class utils:
         
 
     # given a series,alpha and trend return series of smoothed points
-    def holts_multiplicative(self, series, alpha,beta,verbose=False):
+    def holts_multiplicative(series, alpha,beta,verbose=False):
         """Holts or Double Exponential Smoothing Forecast
             Keyword arguments:
             series -- pandas series object
@@ -765,7 +762,7 @@ class utils:
             return result
    
     #for Holt-winters Initial Trend
-    def initial_trend(self, series, slen):
+    def initial_trend(series, slen):
         sum = 0.0
         for i in range(slen):
             sum += float(series[i+slen] - series[i]) / slen
@@ -788,7 +785,7 @@ class utils:
         return seasonals
     
     #Holt-winters 
-    def holt_winters_forecasting(self, series, slen, alpha, beta, gamma, n_preds):
+    def holt_winters_forecasting(series, slen, alpha, beta, gamma, n_preds):
         result = []
         seasonals = utils.initial_seasonal_components(series, slen)
         for i in range(len(series)+n_preds):
@@ -810,7 +807,7 @@ class utils:
         return result
     
         #Holt-winters 
-    def holt_winters_forecasting2(self, series, slen, alpha, beta, gamma, n_preds):
+    def holt_winters_forecasting2(series, slen, alpha, beta, gamma, n_preds):
         result = []
         seasonals = utils.initial_seasonal_components(series, slen)
         for i in range(len(series)+n_preds):
@@ -840,7 +837,7 @@ class metrics:
         self.version = "0.0.1"
         self.author = author
                 
-    def mean_absolute_percentage_error(self, y_true, y_pred): 
+    def mean_absolute_percentage_error(y_true, y_pred): 
         """Mean absolute percentage error
             Keyword arguments:
             y_true -- truth value
@@ -851,7 +848,7 @@ class metrics:
         result= np.mean(np.abs((y_true - y_pred) / y_true)) * 100
         return result
         
-    def root_mean_square_error(self, y_true, y_pred, n=0):
+    def root_mean_square_error(y_true, y_pred, n=0):
         """Root mean squared error
             Keyword arguments:
             y_true -- truth value
@@ -869,7 +866,7 @@ class metrics:
             result = math.sqrt(mse)
             return result
         
-    def mean_squared_error(self, y_true,y_pred):
+    def mean_squared_error(y_true,y_pred):
         """Root mean squared error (Overloaded from sklearn)
             Keyword arguments:
             y_true -- truth value
@@ -879,7 +876,7 @@ class metrics:
         mse = mean_squared_error(y_true,y_pred)
         return mse
     
-    def median_relative_absolute_error(self, y_true,y_pred,naive):
+    def median_relative_absolute_error(y_true,y_pred,naive):
         """Median RAE (Overloaded from sklearn)
             Keyword arguments:
             y_true -- truth value
