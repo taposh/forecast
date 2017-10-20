@@ -1,6 +1,4 @@
-# initial :
-#https://github.com/scikit-learn/scikit-learn/blob/ef5cb84a/sklearn/metrics/regression.py#L183
-version = "Version: 0.0.1"
+version = "Version: 0.0.2"
 author = "Author: Taposh Dutta Roy"
 
 #Libraries
@@ -191,39 +189,47 @@ class utils:
         """
         # Find the type of series object
         if (type(series).__name__ =="Series"):
-            #Find frequency
-            if verbose == True:
-                print("The series is :", series)
-            tsFreq = pd.infer_freq(series.index)
-            #print("The series is looking for frequency",tsFreq)
+            
             #find last period
             last_date = series.index[-1]
             
-            if (tsFreq[0] =='A'):
-                forecast_date = last_date + relativedelta(years=1)
-                if verbose == True: 
-                    print("The time series frequency is : yearly")
-            if (tsFreq[0] =='Q'):
-                forecast_date = last_date + relativedelta(months=3)
-                if verbose == True: 
-                    print("The time series frequency is : quarterly")
-                
-            if (tsFreq[0] =='M'):
-                forecast_date = last_date + relativedelta(months=1)
-                if verbose == True: 
-                    print("The time series frequency is : monthly")
-                
-            if (tsFreq[0] =='W'):
-                forecast_date = last_date + relativedelta(weeks=1)
-                if verbose == True: 
-                    print("The time series frequency is : weekly")
-                
-            if (tsFreq[0] =='D'):
-                forecast_date = last_date + relativedelta(days=1)
-                if verbose == True: 
-                    print("The time series frequency is : daily")
-                
-        return forecast_date
+            #Find frequency
+            tsFreq = pd.infer_freq(series.index)
+            if tsFreq is not None:
+                if verbose == True:
+                    print("The series is :", series)
+                    print("The series is looking for frequency",tsFreq)
+
+                #print("The series is looking for frequency",tsFreq)
+
+
+                if (tsFreq[0] =='A'):
+                    forecast_date = last_date + relativedelta(years=1)
+                    if verbose == True: 
+                        print("The time series frequency is : yearly")
+                    return forecast_date
+                if (tsFreq[0] =='Q'):
+                    forecast_date = last_date + relativedelta(months=3)
+                    if verbose == True: 
+                        print("The time series frequency is : quarterly")
+                    return forecast_date
+                if (tsFreq[0] =='M'):
+                    forecast_date = last_date + relativedelta(months=1)
+                    if verbose == True: 
+                        print("The time series frequency is : monthly")
+                    return forecast_date
+                if (tsFreq[0] =='W'):
+                    forecast_date = last_date + relativedelta(weeks=1)
+                    if verbose == True: 
+                        print("The time series frequency is : weekly")
+                    return forecast_date
+                if (tsFreq[0] =='D'):
+                    forecast_date = last_date + relativedelta(days=1)
+                    if verbose == True: 
+                        print("The time series frequency is : daily")
+                    return forecast_date
+            else :
+                return last_date
                 
         
         
@@ -651,6 +657,9 @@ class utils:
             result_series= utils.exponential_smoothing_forecast(inpseries, alpha,verbose)
             inpseries = pd.concat([inpseries,result_series[len(result_series)-1:]])
             
+        #if only_forecast == True:
+        #    return inpseries[-n_periods]
+        #else :
         return inpseries
         
         
