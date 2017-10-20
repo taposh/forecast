@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='forecast',
-      version='0.1',
+      version='0.0.2',
       description='The forecast package',
       url='https://github.com/taposh/forecast.git',
       author='Taposh Roy',
