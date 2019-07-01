@@ -1,33 +1,10 @@
-version = "Version: 0.0.2"
-author = "Author: Taposh Dutta Roy"
+"""Class docstring goes here.
 
-#Libraries
-import math
-from sklearn.utils import check_array
-import sklearn.metrics
-from sklearn.metrics import mean_squared_error
-import pandas as pd
-import numpy as np
-from statsmodels.tsa.arima_model import ARIMA
-import pip
-from dateutil.relativedelta import relativedelta
-from statistics import median
+"""
 
-# Utils class
-class utils:
-    def __init__(self):
-        self.version = version
-        self.author = author
-    #import and install packages
+class Utilities:
     
-    def import2(package):
-        try:
-            __import__(package)
-        except ImportError:
-            pip.main(['install', package]) 
-                       
-    
-    ##TODO: Fix Typo .........
+    @staticmethod
     def naive_prediction_n_periods(series,n_periods,verbose=False):
         """
         Returns a Series object with Naive Predictions
@@ -181,7 +158,7 @@ class utils:
         return result
         
         
-    
+    @staticmethod
     def find_next_forecastdate(series,verbose=False):
         """Find frequency and forecast dates for a given series
             Keyword arguments:
@@ -233,7 +210,7 @@ class utils:
                 
         
         
-        
+    @staticmethod
     def find_multiple_forecastdates(series,n_preds,verbose=False):         
         """Find Multiple forecast dates for a given series and preds
             Keyword arguments:
@@ -279,7 +256,7 @@ class utils:
         return forecast_date
             
         
-    #function to add period to series
+    @staticmethod
     def addperiodstoSeries(series,num_value,verbose=False):
         """Adding one period to a series.
             Keyword arguments:
@@ -308,7 +285,7 @@ class utils:
         return result_series  
       
         
-        
+    @staticmethod    
     def addOneyeartoSeries(series,num_value,verbose=False):
         """Adding one period to a series.
             Keyword arguments:
@@ -335,6 +312,7 @@ class utils:
         return result_series  
     # pass in a series object and get the forecast for next period
     
+    @staticmethod
     def average_forecast_one_period(series,verbose=False):
         """Average forecasting for one period
             Keyword arguments:
@@ -355,8 +333,7 @@ class utils:
         return result_series
     
     
-    
-    # pass in a series object and get the forecast for next n periods
+    @staticmethod
     def average_forecast_n_periods_old(series,n_periods,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
@@ -393,7 +370,8 @@ class utils:
             print(err)
             print("No value returned")
             return None
-        
+
+    @staticmethod    
     def average_forecast_n_periods(series,n_periods,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
@@ -421,8 +399,7 @@ class utils:
             
         return inpseries
     
-        
-    # pass in a series object and get the forecast for next n periods
+    @staticmethod
     def average_forecast_n_periods2(series,n,start_date,verbose=False):
         """Average forecasting for number of periods
             Keyword arguments:
@@ -459,7 +436,7 @@ class utils:
             print("No value returned")
             return None
             
-    # moving average using k last points
+    @staticmethod
     def moving_average_forecast(series, window_size,verbose=False):
         """Moving Average Forecast
             Keyword arguments:
@@ -474,10 +451,7 @@ class utils:
         result_series = utils.average_forecast_one_period(series[-window_size:])
         return result_series
     
-    ########################################################
-    # Moving average using k last points                   #
-    ########################################################
-    # TODO: Test cases for this
+    @staticmethod
     def moving_average_forecast_n_periods(series, window_size, n,start_date,verbose=False):
         """Moving Average Forecast
             Keyword arguments:
@@ -529,6 +503,7 @@ class utils:
             
             return result_series
     
+    @staticmethod
     def moving_average_forecast_n_periods_old(series,window_size,n_periods,start_date,verbose=True):
         """Moving Average Forecast for number of periods
             Keyword arguments:
@@ -563,7 +538,7 @@ class utils:
             
         return inpseries
     
-    # weighted average, weights is a list of weights
+    @staticmethod
     def weighted_average_forecast(series, weights,verbose=False):
         """Weighted Average Forecast
             Keyword arguments:
@@ -581,8 +556,7 @@ class utils:
         s2 = utils.addperiodstoSeries(series,result,verbose)
         return s2
 
-    # given a series and alpha, return series of smoothed points
-    # https://pandas.pydata.org/pandas-docs/stable/timeseries.html
+    @staticmethod
     def exponential_smoothing_forecast(series, alpha,verbose=False):
         """Exponential Smoothing Forecast
             Keyword arguments:
@@ -630,7 +604,7 @@ class utils:
 
         
     
-    #Exponential Smoothing Forecast for multiple periods
+    @staticmethod
     def exponential_smoothing_forecast_n_periods(series, alpha,n_periods,verbose=False):
         """Exponential Smoothing Forecast for multiple periods
             Keyword arguments:
@@ -665,7 +639,7 @@ class utils:
         
         
         
-    # given a series,alpha and trend return series of smoothed points
+    @staticmethod
     def holts_addative(series, alpha,beta,verbose=False):
         """Holts or Double Exponential Smoothing Forecast
             Keyword arguments:
@@ -718,7 +692,7 @@ class utils:
             return result
         
 
-    # given a series,alpha and trend return series of smoothed points
+    @staticmethod
     def holts_multiplicative(series, alpha,beta,verbose=False):
         """Holts or Double Exponential Smoothing Forecast
             Keyword arguments:
@@ -770,14 +744,14 @@ class utils:
         else :
             return result
    
-    #for Holt-winters Initial Trend
+    @staticmethod
     def initial_trend(series, slen):
         sum = 0.0
         for i in range(slen):
             sum += float(series[i+slen] - series[i]) / slen
         return sum / slen
 
-    #for Holt-winters Initial Season
+    @staticmethod
     def initial_seasonal_components(series, slen):
         seasonals = {}
         season_averages = []
@@ -793,7 +767,7 @@ class utils:
             seasonals[i] = sum_of_vals_over_avg/n_seasons
         return seasonals
     
-    #Holt-winters 
+    @staticmethod
     def holt_winters_forecasting(series, slen, alpha, beta, gamma, n_preds):
         result = []
         seasonals = utils.initial_seasonal_components(series, slen)
@@ -815,7 +789,7 @@ class utils:
         
         return result
     
-        #Holt-winters 
+    @staticmethod
     def holt_winters_forecasting2(series, slen, alpha, beta, gamma, n_preds):
         result = []
         seasonals = utils.initial_seasonal_components(series, slen)
@@ -841,62 +815,3 @@ class utils:
         
         return result
     
-class metrics:
-    def __init__(self):
-        self.version = "0.0.1"
-        self.author = author
-                
-    def mean_absolute_percentage_error(y_true, y_pred): 
-        """Mean absolute percentage error
-            Keyword arguments:
-            y_true -- truth value
-            y_pred -- Predicted value 
-            n -- number of periods
-        """
-        y_true, y_pred = np.array(y_true), np.array(y_pred)
-        result= np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-        return result
-        
-    def root_mean_square_error(y_true, y_pred, n=0):
-        """Root mean squared error
-            Keyword arguments:
-            y_true -- truth value
-            y_pred -- Predicted value 
-            n -- number of periods
-        """
-        if n == 0:
-            #This is directly from the sklearn metric
-            mse = mean_squared_error(y_true,y_pred)
-            result = math.sqrt(mse)
-            return result
-        else:
-            #This is directly from the sklearn metric
-            mse = mean_squared_error(y_true,y_pred,n)
-            result = math.sqrt(mse)
-            return result
-        
-    def mean_squared_error(y_true,y_pred):
-        """Root mean squared error (Overloaded from sklearn)
-            Keyword arguments:
-            y_true -- truth value
-            y_pred -- Predicted value 
-            n -- number of periods
-        """
-        mse = mean_squared_error(y_true,y_pred)
-        return mse
-    
-    def median_relative_absolute_error(y_true,y_pred,naive):
-        """Median RAE (Overloaded from sklearn)
-            Keyword arguments:
-            y_true -- truth value
-            y_pred -- Predicted value 
-            n -- number of periods
-        """
-        result = []
-        for indx in range(len(y_pred)):
-            ii = np.abs(np.array(y_true) - np.array(y_pred))/ np.abs(np.array(naive)-np.array(y_true))
-            if ii is None:
-                result.append(1)
-            else:
-                result.append(ii)
-        return np.ma.median(result)
