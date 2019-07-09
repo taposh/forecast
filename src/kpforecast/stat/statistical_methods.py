@@ -1,6 +1,8 @@
 from kpforecast.utils import Utilities
+
 import numpy as np
 import copy
+from scipy import stats.linregress as linregress
 
 
 class Statistical():
@@ -151,3 +153,19 @@ class Statistical():
         forecast_dates = Utilities.find_next_forecastdates(series, n_periods)
         expS1.append(forecast_date)
         return pd.Series(result, index=expS1)
+    
+    @staticmethod
+    def theta_f(series, alpha, n_periods=1):
+        # if seasonal, decompose and adjust for seasonality
+
+        1) #TODO test for seasonality, if so deseasonalize. If so, remove seasonal factor, store
+        n = len(series)
+        forc = Statistical.ses_f(series, alpha, n_periods)
+        ts_vals = series.to_numpy()
+        b = linregress(np.arange(len(ts_vals), ts_vals))[0]
+        drift = (0.5 * b) * (np.arange(n_periods) + 1/alpha - ((1-alpha)**n)/alpha)
+        forc.array[-n_periods:] += drift
+
+        # if seasonalized, reseasonalize the forecasted values
+        return forc
+
