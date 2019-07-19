@@ -1,8 +1,14 @@
 from kpforecast.utils import Utilities
 
+import pandas as pd
 import numpy as np
 import copy
-from scipy import stats.linregress as linregress
+from scipy.stats import linregress
+import statsmodels.tsa as tsa
+from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.seasonal import seasonal_decompose
+import statsmodels.api as sm
+
 
 
 class Statistical():
@@ -54,6 +60,7 @@ class Statistical():
             result += series[-n - 1] * weights[n]
         return Utilities.addPeriodsToSeries(series, result)
 
+    #TODO for n_periods
     @staticmethod
     def moving_average_forecast(series, window_size, n_periods=1):
         """Moving Average Forecast.
@@ -68,7 +75,7 @@ class Statistical():
         return result_series
 
     @staticmethod
-    def ses_f(series, alpha, n_periods=1):
+    def ses_f(series, alpha=None, n_periods=1):
         """Exponential Smoothing Forecast
 
         Args:
@@ -77,14 +84,17 @@ class Statistical():
             n_periods: number of periods to do ses_f on
         """
         assert (type(series).__name__ == "Series")
-        expS1 = list(series.index)
-        result = [series[0]]
-        for n in range(len(series) + n_periods):
-            result.append(alpha * series[n] + (1 - alpha) * result[n - 1])
-
-        forecast_date = Utilities.find_next_forecastdates(series, n_periods)
-        expS1.append(forecast_date)
-        return pd.Series(result, index=expS1)
+        if n_periods < 1:
+            raise Exception("n_periods must be greater than 1. Currently {}".format(n_periods))
+        # order = (0, 1, 1)
+        # model = ARIMA(series, order)
+        # import ipdb; ipdb.set_trace()
+        model = sm.tsa.SimpleExpSmoothing(series)
+        # if alpha:
+        #     model_fit = model.fit(smoothing_level=alpha, disp=0)
+        # else:
+        model_fit = model.fit()
+        return model_fit.predict(1,len(series) + (n_periods)), model_fit.params['smoothing_level']
 
     @staticmethod
     def holts_linear_f(series, alpha, beta, n_periods=1, mult_or_add=True):
@@ -127,7 +137,7 @@ class Statistical():
     def holt_winters_f(series, slen, alpha, beta, gamma, n_preds):
         """ holt winters additive seasonal forecast
         returns fully smoothed exponential forecast
-        #TODO
+        TODO
         could possibly return timeseries + forecasted values
         """
 
@@ -153,19 +163,31 @@ class Statistical():
         forecast_dates = Utilities.find_next_forecastdates(series, n_periods)
         expS1.append(forecast_date)
         return pd.Series(result, index=expS1)
-    
+
     @staticmethod
-    def theta_f(series, alpha, n_periods=1):
-        # if seasonal, decompose and adjust for seasonality
+    def theta_f(series, alpha=None, n_periods=1):
+        """
 
-        1) #TODO test for seasonality, if so deseasonalize. If so, remove seasonal factor, store
+        Notes: When Alpha = 0.0, actually return 0.2 as according to the R forecasting library
+        """
+        alpha_orig = alpha
+        is_seasonal, inferred_freq = Utilities.check_seasonality(series)
+        if is_seasonal:
+            series_copy = series.copy(deep=True)
+            decomposition = Utilities.decompose(series, period=inferred_freq)
+            seasonal = decomposition.seasonal
+            series = decomposition.trend + decomposition.resid
         n = len(series)
-        forc = Statistical.ses_f(series, alpha, n_periods)
+        forc, alpha = Statistical.ses_f(series, alpha, n_periods)
+        if not alpha:
+            alpha = 0.2
         ts_vals = series.to_numpy()
-        b = linregress(np.arange(len(ts_vals), ts_vals))[0]
-        drift = (0.5 * b) * (np.arange(n_periods) + 1/alpha - ((1-alpha)**n)/alpha)
-        forc.array[-n_periods:] += drift
-
-        # if seasonalized, reseasonalize the forecasted values
+        b = linregress(np.arange(len(ts_vals)), ts_vals)[0]
+        drift = (0.5 * b) * (np.arange(n_periods) + 1/alpha - ((1-alpha) ** n) / alpha)
+        forc[-n_periods:] += drift
+        if is_seasonal:
+            f_len = len(forc)
+            forc[-n_periods:] += (seasonal[-inferred_freq:] * np.trunc(1 + n_periods / inferred_freq))[:n_periods].to_numpy()
+            forc[:-n_periods] += seasonal.to_numpy()
         return forc
 
