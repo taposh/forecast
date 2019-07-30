@@ -68,9 +68,6 @@ db.sqlite3
 instance/
 .webassets-cache
 
-# Scrapy stuff:
-.scrapy
-
 # Sphinx documentation
 docs/_build/
 
@@ -90,8 +87,6 @@ ipython_config.py
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env
@@ -101,13 +96,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
 
 # mkdocs documentation
 /site
@@ -132,6 +120,7 @@ dmypy.json
 *.orig
 .idea
 .settings
+.vscode/
 
 # MacOS
 .DS_Store
@@ -145,8 +134,3 @@ dmypy.json
 Pipfile
 Pipfile.lock
 
-# garage-specific exclusions
-data/
-garage/config_personal.py
-sandbox/
-MUJOCO_LOG.TXT
