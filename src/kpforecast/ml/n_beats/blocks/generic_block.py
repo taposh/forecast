@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from kpforecast.ml.n_beats import NBeatsBlock
+from kpforecast.ml.n_beats.blocks.block import NBeatsBlock
 
 class GenericNBeatsBlock(NBeatsBlock):
     """ Generic N_Beats Block.
