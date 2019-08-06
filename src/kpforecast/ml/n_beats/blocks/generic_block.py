@@ -7,12 +7,12 @@ class GenericNBeatsBlock(NBeatsBlock):
     Args:
         -f_b_dim(list/tuple): The integer length of the
              forward and backwards forecast
-        -layer_dim(int): dimension of input and outputs of
+        -hidden_layer_dim(int): dimension of input and outputs of
             input and hidden layers (1 by default)
         -thetas_dim(list/tuple): list or iterable of output
             dimensions of the theta output layers.
             (None by default, results in thetas dim being
-             a list same where entries are same as layer_dim)
+             a list same where entries are same as hidden_layer_dim)
         -num_hidden_layers(int): number of hidden layers
             (2 by default)
         -layer_nonlinearity: torch.nn nonlinearity function
@@ -25,9 +25,9 @@ class GenericNBeatsBlock(NBeatsBlock):
     """
     def __init__(self,
                  f_b_dim,
-                 layer_dim=1,
                  thetas_dim=None,
                  shared_g_theta=False,
+                 hidden_layer_dim=1,
                  num_hidden_layers=2,
                  layer_nonlinearity=nn.ReLU,
                  layer_w_init=nn.init.xavier_uniform_,
@@ -35,20 +35,22 @@ class GenericNBeatsBlock(NBeatsBlock):
 
         self._shared_g_theta = shared_g_theta
         if(shared_g_theta):
-            if(len(layer_dim) > 1):
-                raise Exception("When sharing Theta outputs, \
-                                 thetas_dim must be a tuple/list of size 1")
-
+            if(len(thetas_dim) == 2):
+                if (not (thetas_dim[0] == thetas_dim[1])):
+                    raise Exception("When sharing g theta in generic block. thetas_dim[0] and thetas_dim[1] must be equal")
+            if not f_b_dim[0] == f_b_dim[1]:
+                raise Exception("When sharing g theta in generic block, the length of the forecast and backcast must be the same")
         super(GenericNBeatsBlock, self).__init__(
-                       layer_dim=layer_dim,
+                       f_b_dim=f_b_dim,
                        thetas_dim=thetas_dim,
                        num_hidden_layers=num_hidden_layers,
+                       hidden_layer_dim=hidden_layer_dim,
                        layer_nonlinearity=layer_nonlinearity,
                        layer_w_init=layer_w_init,
                        layer_b_init=layer_b_init)
 
         self._g_theta_out_layer = nn.ModuleList()
-        for i in range(len(f_b_dim)):
+        for i in range(len(self._thetas_dim)):
             out_layer = nn.Sequential()
             linear_layer = nn.Linear(thetas_dim[i], f_b_dim[i])
             layer_w_init(linear_layer.weight)
@@ -66,10 +68,10 @@ class GenericNBeatsBlock(NBeatsBlock):
                 GenericNBeatsBlock
         Returns:
             List of torch.tensors that are outputs
-            of the network,Where each output is from
+            of the network, Where each output is from
             a different output head
         """
-        thetas = super.forward(input_val)
+        thetas = super(GenericNBeatsBlock, self).forward(input_val)
         if self._shared_g_theta:
             return [self._g_theta_out_layer[0](theta) for theta in thetas]
         else:
@@ -77,5 +79,5 @@ class GenericNBeatsBlock(NBeatsBlock):
                 raise Exception ("number of theta output heads must be \
                                   must be the same as num of g's (\
                                   function generators)")
-            return [layer(thetas) for (layer, theta)
+            return [layer(theta) for (layer, theta)
                     in zip(self._g_theta_out_layer, thetas)]
