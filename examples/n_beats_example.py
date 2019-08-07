@@ -48,25 +48,27 @@ from torchviz import make_dot, make_dot_from_trace
 #     return np.array(X).flatten()
 
 
-# class DatasetTS(Dataset):
+class DatasetTS(Dataset):
     
-#     def __init__(self, time_series, forecast_length, backcast_length):
-#         self.data = time_series
-#         self.forecast_length, self.backcast_length = forecast_length, backcast_length
-#     def __len__(self):
-#         return len(self.data)
+    def __init__(self, time_series, forecast_length, backcast_length):
+        self.data = time_series
+        self.forecast_length, self.backcast_length = forecast_length, backcast_length
+    def __len__(self):
+        return len(self.data)-(self.forecast_length + self.backcast_length)
     
-#     def __getitem__(self, index):
-#         if index+self.backcast_length:
-#             backcast_model_input = self.data[index:index+self.backcast_length]
-#         else: 
-#             backcast_model_input = self.data[index:]
-#         forecast_actuals_idx = index+self.backcast_length
-#         forecast_actuals_output = self.data[forecast_actuals_idx:
-#                                             forecast_actuals_idx+self.forecast_length]
-#         backcast_model_input = torch.from_numpy(backcast_model_input)
-#         forecast_actuals_output = torch.from_numpy(forecast_actuals_output)
-#         return backcast_model_input, forecast_actuals_output
+    def __getitem__(self, index):
+        if(index > self.__len__()):
+            raise IndexError("Index out of Bounds")
+        if index+self.backcast_length:
+            backcast_model_input = self.data[index:index+self.backcast_length]
+        else: 
+            backcast_model_input = self.data[index:]
+        forecast_actuals_idx = index+self.backcast_length
+        forecast_actuals_output = self.data[forecast_actuals_idx:
+                                            forecast_actuals_idx+self.forecast_length]
+        backcast_model_input = torch.from_numpy(backcast_model_input)
+        forecast_actuals_output = torch.from_numpy(forecast_actuals_output)
+        return backcast_model_input, forecast_actuals_output
 
 
 
@@ -168,16 +170,14 @@ def get_data(num_samples, backcast_length, forecast_length, signal_type='seasona
         x = np.expand_dims(x, axis=0)
         y = x[:, backcast_length:]
         x = x[:, :backcast_length]
-        return x[0], y[0]
+        return x[0]
 
     while True:
         X = []
-        Y = []
         for i in range(num_samples):
-            x, y = get_x_y()
+            x = get_x_y()
             X.append(x)
-            Y.append(y)
-        yield np.array(X), np.array(Y)
+        yield np.array(X).flatten()
 
 '''
 import os
@@ -192,14 +192,14 @@ from torch.nn import functional as F
 from data import get_data
 from model import NBeatsNet
 ''' 
-CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
-
 parser = ArgumentParser(description='N-Beats')
 parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
 parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
+parser.add_argument('--checkpoint', default="", help = "checkpoint dir")
 args = parser.parse_args()
 DEVICE = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
 DISABLE_PLOT = args.disable_plot
+CHECKPOINT_NAME = args.checkpoint
 
 
 def train():
@@ -207,9 +207,17 @@ def train():
     backcast_length = 5 * forecast_length
     batch_size = 100  # greater than 4 for viz
     f_b_dim = (forecast_length, backcast_length)
+    num_samples = 0
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         signal_type='seasonality', random=True)
-
+    ts = []
+    for grad_step, x, in enumerate(data_gen):
+        if num_samples == 5000:
+            break
+        ts.append(x)
+        num_samples += len(x)
+    ts = np.concatenate(ts)
+    data = DatasetTS(ts, forecast_length, backcast_length)
     print('--- Model ---')
     # net = NBeatsNet(device=DEVICE,
     #                 stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
@@ -219,7 +227,7 @@ def train():
     #                 backcast_length=backcast_length,
     #                 hidden_layer_units=1024,
     #                 share_weights_in_stack=False)
-    
+
     net = NBeats(stacks=[GenericNBeatsBlock, GenericNBeatsBlock],
                 f_b_dim=f_b_dim,
                 num_blocks_per_stack=3,
@@ -240,7 +248,7 @@ def train():
 
     print('--- Training ---')
     initial_grad_step = load(net, optimiser)
-    for grad_step, (x, target) in enumerate(data_gen):
+    for grad_step, (x, target) in enumerate(data):
         grad_step += initial_grad_step
         optimiser.zero_grad()
         net.train()
@@ -269,6 +277,7 @@ def save(model, optimiser, grad_step):
 
 
 def load(model, optimiser):
+    import ipdb; ipdb.set_trace()
     if os.path.exists(CHECKPOINT_NAME):
         checkpoint = torch.load(CHECKPOINT_NAME)
         model.load_state_dict(checkpoint['model_state_dict'])
