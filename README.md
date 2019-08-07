@@ -10,6 +10,7 @@ https://arxiv.org/pdf/1503.03529.pdf
 https://pkg.robjhyndman.com/forecast/reference/thetaf.html
 
 N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
+
 https://arxiv.org/abs/1905.10437
 
 
