@@ -11,6 +11,11 @@ runs/
 # C extensions
 *.so
 
+runs/
+*.ipynb
+*.th
+*.png
+
 # Distribution / packaging
 .Python
 build/
