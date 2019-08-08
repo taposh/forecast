@@ -34,11 +34,12 @@ class DatasetTS(Dataset):
         self.data = time_series
         self.forecast_length, self.backcast_length = forecast_length, backcast_length
     def __len__(self):
-        return len(self.data)-(self.forecast_length + self.backcast_length)
+        return (len(self.data)-self.forecast_length) / self.backcast_length
     
     def __getitem__(self, index):
         if(index > self.__len__()):
             raise IndexError("Index out of Bounds")
+        index = index * self.backcast_length
         if index+self.backcast_length:
             backcast_model_input = self.data[index:index+self.backcast_length]
         else: 
