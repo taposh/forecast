@@ -11,6 +11,7 @@ runs/
 # C extensions
 *.so
 
+data/
 runs/
 *.ipynb
 *.th
