@@ -64,7 +64,7 @@ class GenericNBeatsBlock(NBeatsBlock):
         """ Feed Forward function for GenericNBeatsBlock
             module.
         Args:
-            input val(torch.tensor): input for
+            Input val(torch.tensor): input for
                 GenericNBeatsBlock
         Returns:
             List of torch.tensors that are outputs

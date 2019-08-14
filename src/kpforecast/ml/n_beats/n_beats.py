@@ -58,34 +58,34 @@ class NBeats(nn.Module):
                  f_b_dim,
                  num_blocks_per_stack=5,
                  share_stack_weights=False,
-                 thetas_dim=None,
+                 thetas_dims=None,
                  shared_g_theta=False,
                  hidden_layer_dim=1,
                  num_hidden_layers=2,
                  layer_nonlinearity=nn.ReLU,
                  layer_w_init=nn.init.xavier_uniform_,
                  layer_b_init=nn.init.zeros_):
-
+        
+        assert(len(thetas_dims) == len(stacks))
         self._stack_classes = stacks
         self._f_b_dim = f_b_dim
         self._num_blocks_per_stack = num_blocks_per_stack
         self._share_stack_weights = share_stack_weights
-        self._thetas_dim = thetas_dim
+        self._thetas_dims = thetas_dims
         self._shared_g_theta = shared_g_theta
         self._hidden_layer_dim = hidden_layer_dim
         self._num_hidden_layers = num_hidden_layers
         self._layer_nonlinearity = layer_nonlinearity
         self._layer_w_init = layer_w_init
         self._layer_b_init = layer_b_init
-
         super().__init__()
         self._stacks = nn.ModuleList()
-        for block_cls in self._stack_classes:
+        for idx, block_cls in enumerate(self._stack_classes):
             new_stack = Stack(f_b_dim=self._f_b_dim,
                               block_cls=block_cls,
                               num_blocks=self._num_blocks_per_stack,
                               share_stack_weights=self._share_stack_weights,
-                              thetas_dim=self._thetas_dim,
+                              thetas_dim=self._thetas_dims[idx],
                               shared_g_theta=self._shared_g_theta,
                               hidden_layer_dim=self._hidden_layer_dim,
                               num_hidden_layers=self._num_hidden_layers,
@@ -99,7 +99,7 @@ class NBeats(nn.Module):
         forecasted_values = torch.zeros((forecast_length))
         # import ipdb; ipdb.set_trace()
         residuals = input_var
-        for stack in self._stacks:
+        for idx, stack in enumerate(self._stacks):
             local_stack_forecast, local_stack_backcast = stack(residuals)
             forecasted_values = forecasted_values + (local_stack_forecast)
             residuals = residuals - (local_stack_backcast)

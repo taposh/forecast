@@ -31,7 +31,7 @@ class NBeatsBlock(nn.Module):
     def __init__(self,
                  f_b_dim,
                  thetas_dim=None,
-                 num_hidden_layers=2,
+                 num_hidden_layers=3,
                  hidden_layer_dim=1,
                  layer_nonlinearity=nn.ReLU,
                  layer_w_init=nn.init.xavier_uniform_,
@@ -43,18 +43,15 @@ class NBeatsBlock(nn.Module):
         self._theta_heads = 2
         self._thetas_dim = (thetas_dim if thetas_dim is not
                            None else [self._hidden_layer_dim] * self._theta_heads)
-        if (not (type(self._thetas_dim) == tuple
-                 or type(self._thetas_dim) == list)):
-            raise Exception("thetas dim must be of type list or tuple")
-        # assert(len(self._thetas_dim) == self._theta_heads)
+
         self._layers = nn.ModuleList()
         self._thetas_output_layers = nn.ModuleList()
         input_dim = self._f_b_dim[1]
         # input layer
         input_layer = nn.Sequential()
         linear_layer = nn.Linear(input_dim, self._hidden_layer_dim)
-        layer_w_init(linear_layer.weight)
-        layer_b_init(linear_layer.bias)
+        # layer_w_init(linear_layer.weight)
+        # layer_b_init(linear_layer.bias)
         input_layer.add_module('block_input', linear_layer)
         if layer_nonlinearity:
             input_layer.add_module('non_linearity', layer_nonlinearity())
@@ -64,22 +61,22 @@ class NBeatsBlock(nn.Module):
         for i in range(self._num_hidden_layers):
             hidden_layer = nn.Sequential()
             linear_layer = nn.Linear(self._hidden_layer_dim, self._hidden_layer_dim)
-            layer_w_init(linear_layer.weight)
-            layer_b_init(linear_layer.bias)
+            # layer_w_init(linear_layer.weight)
+            # layer_b_init(linear_layer.bias)
             hidden_layer.add_module('block_hidden_' + str(i), linear_layer)
             if layer_nonlinearity:
                 hidden_layer.add_module('non_linearity', layer_nonlinearity())
             self._layers.append(hidden_layer)
 
         # multi-headed output
-        for i in range(len(self._thetas_dim)):
+        for idx, thetas_dim in enumerate(self._thetas_dim):
             output_head = nn.Sequential()
-            linear_layer = nn.Linear(self._hidden_layer_dim, self._thetas_dim[i])
-            layer_w_init(linear_layer.weight)
-            layer_b_init(linear_layer.bias)
-            output_head.add_module('block_output_' + str(i), linear_layer)
-            if layer_nonlinearity:
-                output_head.add_module('non_linearity', layer_nonlinearity())
+            linear_layer = nn.Linear(self._hidden_layer_dim, thetas_dim)
+            # layer_w_init(linear_layer.weight)
+            # layer_b_init(linear_layer.bias)
+            output_head.add_module('block_output_' + str(idx), linear_layer)
+            # if layer_nonlinearity:
+            #     output_head.add_module('non_linearity', layer_nonlinearity())
             self._thetas_output_layers.append(output_head)
 
     def forward(self, input_val):
