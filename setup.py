@@ -3,15 +3,21 @@ from setuptools import setup
 
 required = [
     # please keep alphabetized
+    "future",
+    "ipdb",
     "pandas",
+    "pillow",
     "python-dateutil",
     "pytest",
     "matplotlib",
     "numpy",
     "sklearn",
     "statsmodels",
+    "tb-nightly",
+    "tensorboard",
+    "tensorflow",
     "torch",
-    "tensorflow"
+    "torchviz",
 ]
 
 setup(name='kpforecast',
