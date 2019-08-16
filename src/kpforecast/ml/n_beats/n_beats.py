@@ -56,7 +56,7 @@ class NBeats(nn.Module):
     def __init__(self,
                  stacks,
                  f_b_dim,
-                 num_blocks_per_stack=5,
+                 num_blocks_per_stack=[5],
                  share_stack_weights=False,
                  thetas_dims=None,
                  shared_g_theta=False,
@@ -66,7 +66,7 @@ class NBeats(nn.Module):
                  layer_w_init=nn.init.xavier_uniform_,
                  layer_b_init=nn.init.zeros_):
         
-        assert(len(thetas_dims) == len(stacks))
+        assert(len(thetas_dims) == len(stacks) == len(num_blocks_per_stack))
         self._stack_classes = stacks
         self._f_b_dim = f_b_dim
         self._num_blocks_per_stack = num_blocks_per_stack
@@ -83,7 +83,7 @@ class NBeats(nn.Module):
         for idx, block_cls in enumerate(self._stack_classes):
             new_stack = Stack(f_b_dim=self._f_b_dim,
                               block_cls=block_cls,
-                              num_blocks=self._num_blocks_per_stack,
+                              num_blocks=self._num_blocks_per_stack[idx],
                               share_stack_weights=self._share_stack_weights,
                               thetas_dim=self._thetas_dims[idx],
                               shared_g_theta=self._shared_g_theta,
