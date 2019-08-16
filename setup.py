@@ -6,10 +6,12 @@ required = [
     "pandas",
     "python-dateutil",
     "pytest",
+    "matplotlib",
     "numpy",
     "sklearn",
     "statsmodels",
-    "torch"
+    "torch",
+    "tensorflow"
 ]
 
 setup(name='kpforecast',
