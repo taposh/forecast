@@ -60,7 +60,6 @@ class Statistical():
             result += series[-n - 1] * weights[n]
         return Utilities.addPeriodsToSeries(series, result)
 
-    #TODO for n_periods
     @staticmethod
     def moving_average_forecast(series, window_size, n_periods=1):
         """Moving Average Forecast.
@@ -86,13 +85,7 @@ class Statistical():
         assert (type(series).__name__ == "Series")
         if n_periods < 1:
             raise Exception("n_periods must be greater than 1. Currently {}".format(n_periods))
-        # order = (0, 1, 1)
-        # model = ARIMA(series, order)
-        # import ipdb; ipdb.set_trace()
         model = sm.tsa.SimpleExpSmoothing(series)
-        # if alpha:
-        #     model_fit = model.fit(smoothing_level=alpha, disp=0)
-        # else:
         model_fit = model.fit()
         return model_fit.predict(1,len(series) + (n_periods)), model_fit.params['smoothing_level']
 
@@ -165,12 +158,14 @@ class Statistical():
         return pd.Series(result, index=expS1)
 
     @staticmethod
-    def theta_f(series, alpha=None, n_periods=1):
-        """
+    def theta_f(series, n_periods=1):
+        """ Original Theta forecast, as described by A&N.
 
+        Args:
+            - Series(PD Series): series to compute forecsat on
+            - n_periods(int): number of periods to forecast
         Notes: When Alpha = 0.0, actually return 0.2 as according to the R forecasting library
         """
-        alpha_orig = alpha
         is_seasonal, inferred_freq = Utilities.check_seasonality(series)
         if is_seasonal:
             series_copy = series.copy(deep=True)
