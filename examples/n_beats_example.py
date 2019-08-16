@@ -38,6 +38,9 @@ def train():
     batch_size = 1  # greater than 4 for viz
     f_b_dim = (forecast_length, backcast_length)
     num_samples = 0
+    num_stacks = 16
+    epochs = 50
+    lr=5e-4
 
     # If the user specified a checkpoint, load the data
     # and model from that checkpoint/run
@@ -49,29 +52,29 @@ def train():
         for grad_step, x, in enumerate(data_gen):
             ts.append(x)
             num_samples += len(x)
-            if num_samples >= 17000:
+            if num_samples >= 5000:
                 break
         ts = np.concatenate(ts)
         save_ts(ts)
     else:
         ts = np.load("data/" + RUN_NAME + "/dataset/timeseries.npy")
     data = DatasetTS(ts, forecast_length, backcast_length)
-    net = NBeats(stacks=[GenericNBeatsBlock] * 8,
+    net = NBeats(stacks=[GenericNBeatsBlock] * num_stacks,
                  f_b_dim=f_b_dim,
                  num_blocks_per_stack=4,
                  thetas_dim=[12,24],
-                 hidden_layer_dim=4)
+                 hidden_layer_dim=4,
+                 share_stack_weights=True)
 
-    optimiser = optim.Adam(net.parameters(), lr=1.5e-3)
+    optimiser = optim.Adam(net.parameters(), lr=lr)
     print('--- Training ---')
-    epochs = 200
     initial_epoch_step = load_model(net, optimiser)
     ds_len = len(data)
     train_length = int(np.ceil(ds_len*0.95))
     train_sampler = SubsetRandomSampler(list(range(train_length)))
     validation_sampler = SubsetRandomSampler(list(range(train_length + 1, ds_len)))
     train_loader = torch.utils.data.DataLoader(data,
-                                               batch_size=50,
+                                               batch_size=40,
                                                sampler=train_sampler)
     validation_loader = torch.utils.data.DataLoader(data,
                                                     batch_size=4,
@@ -83,12 +86,18 @@ def train():
             optimiser.zero_grad()
             net.train()
             forecast, backcast = net(x)
-            # loss = F.mse_loss(forecast, target)
+            #loss = F.mse_loss(forecast, target)
             loss = F.smooth_l1_loss(forecast, target)
+            temp = loss
+            # if loss < 0.1:
+            #     loss = 2 * loss
+            #     if epoch > 5:
+            #         loss = loss * 2.5
+            loss = loss * 100
             loss.backward()
             optimiser.step()
         if writer:
-            writer.add_scalar("loss/training_loss", loss, epoch)
+            writer.add_scalar("loss/training_loss", temp, epoch)
         with torch.no_grad():
             # save_model(net, optimiser, epoch)
             if not DISABLE_PLOT:
