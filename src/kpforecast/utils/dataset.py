@@ -3,27 +3,43 @@ from torch.utils.data import Dataset
 
 
 class DatasetTS(Dataset):
-
-    def __init__(self, time_series, forecast_length, backcast_length):
-        # TODO
-        # if sliding window is none, set equal to backcast length
-        # self.sliding_window
-
+    """ Data Set Utility for Time Series.
+    
+        Args:
+            - time_series(numpy 1d array) - array with univariate time series
+            - forecast_length(int) - length of forecast window
+            - backcast_length(int) - length of backcast window
+            - sliding_window_coef(int) - determines how much to adjust sliding window
+                by when determining forecast backcast pairs:
+                    if sliding_window_coef = 1, this will make it so that backcast 
+                    windows will be sampled that don't overlap. 
+                    If sliding_window_coef=2, then backcast windows will overlap 
+                    by 1/2 of their data. This creates a dataset with more training
+                    samples, but can potentially lead to overfitting.
+    """
+    def __init__(self, time_series, forecast_length, backcast_length, sliding_window_coef=1):
         self.data = time_series
         self.forecast_length, self.backcast_length = forecast_length, backcast_length
+        self.sliding_window_coef = sliding_window_coef
+        self.sliding_window = int(np.ceil(self.backcast_length / sliding_window_coef))
     
     def __len__(self):
-        # TODO use sliding window
-        # (len(self.data) - self.forecast_length) / self.sliding_window
-        # import ipdb; ipdb.set_trace()
-        length = int(np.floor((len(self.data)-self.forecast_length) / self.backcast_length))
+        """ Return the number of backcast/forecast pairs in the dataset.
+        """
+        length = int(np.floor((len(self.data)-(self.forecast_length+self.backcast_length)) / self.sliding_window))
         return length
 
     def __getitem__(self, index):
+        """Get a single forecast/backcast pair by index.
+            
+            Args:
+                index(int) - index of forecast/backcast pair
+            raise exception if the index is greater than DatasetTS.__len__()
+        """
         if(index > self.__len__()):
             raise IndexError("Index out of Bounds")
-        index = index * self.backcast_length
-        # index = index * self.sliding_window
+        # index = index * self.backcast_length
+        index = index * self.sliding_window
         if index+self.backcast_length:
             backcast_model_input = self.data[index:index+self.backcast_length]
         else: 
@@ -55,9 +71,6 @@ def data_generator(num_samples, backcast_length, forecast_length, signal_type='s
             raise Exception('Unknown signal type.')
         x -= np.minimum(np.min(x), 0)
         x /= np.max(np.abs(x))
-        # x = np.expand_dims(x, axis=0)
-        # y = x[:, backcast_length:]
-        # x = x[:, :backcast_length]
         return x
 
     while True:
