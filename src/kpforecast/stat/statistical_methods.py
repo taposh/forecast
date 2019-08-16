@@ -10,7 +10,6 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import statsmodels.api as sm
 
 
-
 class Statistical():
     """
     This module represents a collection of common statistical
@@ -133,7 +132,6 @@ class Statistical():
         TODO
         could possibly return timeseries + forecasted values
         """
-
         expS1 = list(series.index)
         result = []
         seasonals = Utilities.initial_seasonal_components(series, slen)
