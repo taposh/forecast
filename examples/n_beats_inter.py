@@ -1,4 +1,8 @@
-from kpforecast.ml import GenericNBeatsBlock, NBeats, Stack
+
+from kpforecast.ml import NBeats
+from kpforecast.ml.n_beats.blocks import (GenericNBeatsBlock,
+                                   TrendBlock,
+                                   SeasonalityBlock)
 from kpforecast.utils import DatasetTS, data_generator
 
 import datetime
@@ -33,14 +37,12 @@ else:
     RUN_NAME = CHECKPOINT_NAME[5:22]
 
 def train():
-    forecast_length = 12
-    backcast_length = 2 * forecast_length
+    forecast_length = 3
+    backcast_length = 24
     batch_size = 1  # greater than 4 for viz
     f_b_dim = (forecast_length, backcast_length)
     num_samples = 0
-    num_stacks = 16
-    epochs = 50
-    lr=5e-4
+    lr = 1e-3
 
     # If the user specified a checkpoint, load the data
     # and model from that checkpoint/run
@@ -52,29 +54,40 @@ def train():
         for grad_step, x, in enumerate(data_gen):
             ts.append(x)
             num_samples += len(x)
-            if num_samples >= 5000:
+            if num_samples >= 100000:
                 break
         ts = np.concatenate(ts)
         save_ts(ts)
     else:
         ts = np.load("data/" + RUN_NAME + "/dataset/timeseries.npy")
     data = DatasetTS(ts, forecast_length, backcast_length)
-    net = NBeats(stacks=[GenericNBeatsBlock] * num_stacks,
+    net = NBeats(stacks=[TrendBlock, SeasonalityBlock, GenericNBeatsBlock],
                  f_b_dim=f_b_dim,
                  num_blocks_per_stack=4,
-                 thetas_dim=[12,24],
-                 hidden_layer_dim=4,
-                 share_stack_weights=True)
+                 thetas_dims=[[2,2], [8,8], [2,8]],
+                 hidden_layer_dim=64)
+    # net = NBeats(stacks=[GenericNBeatsBlock] * 2,
+    #              f_b_dim=f_b_dim,
+    #              num_blocks_per_stack=4,
+    #              thetas_dims=[[8,8], [8,8]],
+    #              hidden_layer_dim=64)
+    # net = NBeats(stacks=[SeasonalityBlock, GenericNBeatsBlock],
+    #              f_b_dim=f_b_dim,
+    #              num_blocks_per_stack=4,
+    #              thetas_dims=[[8,8], [8,8]],
+    #              hidden_layer_dim=128)
+
 
     optimiser = optim.Adam(net.parameters(), lr=lr)
     print('--- Training ---')
+    epochs = 50
     initial_epoch_step = load_model(net, optimiser)
     ds_len = len(data)
     train_length = int(np.ceil(ds_len*0.95))
     train_sampler = SubsetRandomSampler(list(range(train_length)))
     validation_sampler = SubsetRandomSampler(list(range(train_length + 1, ds_len)))
     train_loader = torch.utils.data.DataLoader(data,
-                                               batch_size=40,
+                                               batch_size=100,
                                                sampler=train_sampler)
     validation_loader = torch.utils.data.DataLoader(data,
                                                     batch_size=4,
@@ -86,14 +99,10 @@ def train():
             optimiser.zero_grad()
             net.train()
             forecast, backcast = net(x)
-            #loss = F.mse_loss(forecast, target)
             loss = F.smooth_l1_loss(forecast, target)
             temp = loss
-            # if loss < 0.1:
-            #     loss = 2 * loss
-            #     if epoch > 5:
-            #         loss = loss * 2.5
-            loss = loss * 100
+            # loss = loss * 100
+            #loss = F.smooth_l1_loss(forecast, target)
             loss.backward()
             optimiser.step()
         if writer:
@@ -107,8 +116,9 @@ def train():
                      validation_loader,
                      backcast_length,
                      forecast_length,
-                     epoch, 
+                     epoch,
                      writer)
+    plt.close()
 
 def plot(net,
          backcast_validation_data,
@@ -146,13 +156,20 @@ def plot(net,
     if writer:
         writer.add_figure('validation/fitted_data', fig)
     validation_losses = []
+    sMAPE = 0
+    num_eval_samples = 0
     for idx, (x, target) in enumerate(loaded_dataset):
         forecasted_out, _ = net(x)
+        for idx, (targ, forc) in enumerate(zip(target, forecasted_out)):
+            num_eval_samples += 1
+            sMAPE += np.abs(forc-targ) / ((np.abs(targ)+np.abs(forc))/2)
         smooth_l1_loss = F.smooth_l1_loss(target, forecasted_out)
         validation_losses.append(smooth_l1_loss)
+    sMAPE = torch.mean(sMAPE / num_eval_samples)
     plt.clf()
     final_loss = np.mean(validation_losses)
     if writer:
+        writer.add_scalar("loss/sMAPE", sMAPE, epoch)
         writer.add_scalar('loss/validation_loss', final_loss, epoch)
     return final_loss
 
