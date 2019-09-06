@@ -66,7 +66,13 @@ class NBeats(nn.Module):
                  layer_w_init=nn.init.xavier_uniform_,
                  layer_b_init=nn.init.zeros_):
         
-        assert(len(thetas_dims) == len(stacks) == len(num_blocks_per_stack))
+        if not (len(thetas_dims) == len(stacks) == len(num_blocks_per_stack)):
+            raise Exception("thetas dims, stacks, and num_blocks_per_stack must \
+                            all be lists/tuples of equal length. \
+                            thetas_dim = {}, stacks = {}, \
+                            num_blocks_per_stack = {}".format(len(thetas_dim),
+                                                              len(stacks),
+                                                              len(num_blocks_per_stack)))
         self._stack_classes = stacks
         self._f_b_dim = f_b_dim
         self._num_blocks_per_stack = num_blocks_per_stack

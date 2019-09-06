@@ -63,19 +63,9 @@ def train():
     data = DatasetTS(ts, forecast_length, backcast_length)
     net = NBeats(stacks=[TrendBlock, SeasonalityBlock, GenericNBeatsBlock],
                  f_b_dim=f_b_dim,
-                 num_blocks_per_stack=4,
+                 num_blocks_per_stack=[2,4,4],
                  thetas_dims=[[2,2], [8,8], [2,8]],
                  hidden_layer_dim=64)
-    # net = NBeats(stacks=[GenericNBeatsBlock] * 2,
-    #              f_b_dim=f_b_dim,
-    #              num_blocks_per_stack=4,
-    #              thetas_dims=[[8,8], [8,8]],
-    #              hidden_layer_dim=64)
-    # net = NBeats(stacks=[SeasonalityBlock, GenericNBeatsBlock],
-    #              f_b_dim=f_b_dim,
-    #              num_blocks_per_stack=4,
-    #              thetas_dims=[[8,8], [8,8]],
-    #              hidden_layer_dim=128)
 
 
     optimiser = optim.Adam(net.parameters(), lr=lr)

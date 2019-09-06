@@ -38,7 +38,6 @@ def train():
     batch_size = 1  # greater than 4 for viz
     f_b_dim = (forecast_length, backcast_length)
     num_samples = 0
-    num_stacks = 16
     epochs = 50
     lr=5e-4
 
@@ -59,11 +58,11 @@ def train():
     else:
         ts = np.load("data/" + RUN_NAME + "/dataset/timeseries.npy")
     data = DatasetTS(ts, forecast_length, backcast_length)
-    net = NBeats(stacks=[GenericNBeatsBlock] * num_stacks,
+    net = NBeats(stacks=[GenericNBeatsBlock] * 2,
                  f_b_dim=f_b_dim,
-                 num_blocks_per_stack=4,
-                 thetas_dim=[12,24],
-                 hidden_layer_dim=4,
+                 num_blocks_per_stack=[4, 4],
+                 thetas_dims=[[12,12],[24,24]],
+                 hidden_layer_dim=16,
                  share_stack_weights=True)
 
     optimiser = optim.Adam(net.parameters(), lr=lr)
